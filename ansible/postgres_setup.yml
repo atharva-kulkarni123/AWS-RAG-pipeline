@@ -1,5 +1,5 @@
 ---
-- name: Configure RAG PostgreSQL environment
+- name: Configure RAG PostgreSQL database
   hosts: localhost
   connection: local
   become: true
@@ -14,37 +14,6 @@
 
   tasks:
 
-    # -----------------------------------------
-    # Install required packages
-    # -----------------------------------------
-
-    - name: Install PostgreSQL client
-      ansible.builtin.dnf:
-        name: postgresql17
-        state: present
-
-    - name: Install Python pip
-      ansible.builtin.dnf:
-        name: python3-pip
-        state: present
-
-    - name: Install psycopg2
-      ansible.builtin.pip:
-        name: psycopg2-binary
-
-    # -----------------------------------------
-    # Install Ansible collection
-    # -----------------------------------------
-
-    - name: Install PostgreSQL Ansible collection
-      ansible.builtin.command:
-        cmd: ansible-galaxy collection install community.postgresql
-      changed_when: false
-
-    # -----------------------------------------
-    # Enable pgvector
-    # -----------------------------------------
-
     - name: Enable pgvector extension
       community.postgresql.postgresql_ext:
         name: vector
@@ -54,10 +23,6 @@
         login_user: "{{ db_user }}"
         login_password: "{{ db_password }}"
         state: present
-
-    # -----------------------------------------
-    # Create document chunks table
-    # -----------------------------------------
 
     - name: Create document_chunks table
       community.postgresql.postgresql_query:
@@ -74,10 +39,6 @@
               source TEXT,
               page_number INT
           );
-
-    # -----------------------------------------
-    # Create HNSW index
-    # -----------------------------------------
 
     - name: Create HNSW vector index
       community.postgresql.postgresql_query:
