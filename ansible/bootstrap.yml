@@ -1,16 +1,46 @@
 ---
-- name: Bootstrap PostgreSQL Ansible dependencies
+- name: Bootstrap PostgreSQL dependencies
   hosts: localhost
   connection: local
   become: true
   gather_facts: false
 
+  vars:
+    db_host: "{{ lookup('env', 'RDS_ENDPOINT') }}"
+    db_port: "{{ lookup('env', 'RDS_PORT') | default('5432', true) }}"
+    db_name: "{{ lookup('env', 'RDS_DATABASE') }}"
+    db_user: "{{ lookup('env', 'RDS_USERNAME') }}"
+
   tasks:
 
-    - name: Install PostgreSQL client
+    - name: Install PostgreSQL 17 client
       ansible.builtin.dnf:
-        name: postgresql
+        name: postgresql17
         state: present
+
+    - name: Verify PostgreSQL client installation
+      ansible.builtin.command:
+        cmd: psql --version
+      register: psql_version
+      changed_when: false
+
+    - name: Display PostgreSQL client version
+      ansible.builtin.debug:
+        msg: "{{ psql_version.stdout }}"
+
+    - name: Wait for RDS PostgreSQL to accept connections
+      ansible.builtin.command:
+        cmd: >
+          pg_isready
+          -h {{ db_host }}
+          -p {{ db_port }}
+          -U {{ db_user }}
+          -d {{ db_name }}
+      register: rds_status
+      retries: 30
+      delay: 10
+      until: rds_status.rc == 0
+      changed_when: false
 
     - name: Install Python pip
       ansible.builtin.dnf:
