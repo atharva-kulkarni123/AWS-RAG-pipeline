@@ -1,0 +1,6 @@
+boto3
+python-dotenv
+pypdf
+langchain-text-splitters
+psycopg[binary]
+pgvector
