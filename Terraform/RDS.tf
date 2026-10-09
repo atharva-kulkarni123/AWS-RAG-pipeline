@@ -23,16 +23,6 @@ resource "aws_security_group" "rds" {
   description = "Security group for RAG PostgreSQL RDS"
   vpc_id      = aws_vpc.main.id
 
-  # PostgreSQL
-  ingress {
-    description = "PostgreSQL from private application subnets"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-
-    cidr_blocks = var.private_subnet_cidrs
-  }
-
   # Outbound traffic
   egress {
     from_port   = 0
@@ -46,6 +36,15 @@ resource "aws_security_group" "rds" {
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "rds_from_ansible" {
+  security_group_id            = aws_security_group.rds.id
+  referenced_security_group_id = aws_security_group.ansible_sg.id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  description                  = "PostgreSQL from Ansible controller EC2"
+}
+
 
 # ---------------------------------------------------------
 # RDS PostgreSQL
@@ -57,11 +56,11 @@ resource "aws_db_instance" "rag" {
   engine         = "postgres"
   engine_version = "17"
 
-  instance_class = "db.t4g.micro"
+  instance_class = "db.t3.micro"
 
   allocated_storage     = 20
   max_allocated_storage = 100
-  storage_type          = "gp3"
+  storage_type          = "gp2"
 
   db_name  = "ragdb"
   username = var.db_username

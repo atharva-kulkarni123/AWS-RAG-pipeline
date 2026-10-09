@@ -22,8 +22,8 @@ isolated_subnet_cidrs = [
   "10.0.22.0/24"
 ]
 
-db_username = ""
-db_password = ""
+db_username = "postgres"
+db_password = "" # ad password for DB
 
 bucket_name = "rag-documents-prod-234123"
 

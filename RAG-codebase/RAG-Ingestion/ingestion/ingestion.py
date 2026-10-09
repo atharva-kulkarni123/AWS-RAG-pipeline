@@ -14,19 +14,27 @@ class IngestionService:
         self.embedding_service = EmbeddingService()
         self.vector_db = VectorDB()
 
-    def ingest(self):
-        files = self.s3.list_files(Config.S3_BUCKET)
+    def ingest(self, s3_key=None, document_id=None):
+        files = (
+            [s3_key]
+            if s3_key
+            else self.s3.list_files(Config.S3_BUCKET)
+        )
         files = [
             key for key in files
             if key.lower().endswith(".pdf")
         ]
 
+        if s3_key and not files:
+            raise ValueError("The requested S3 object is not a PDF file")
+
         print(f"Found {len(files)} PDF file(s) in S3.")
 
         for file_number, key in enumerate(files, start=1):
             print(f"\nFile {file_number}: {key}")
+            current_document_id = document_id or key
 
-            if self.vector_db.document_exists(key):
+            if self.vector_db.document_exists(current_document_id):
                 print("  Status: skipped (already ingested)")
                 continue
 
@@ -48,7 +56,7 @@ class IngestionService:
                     chunk["text"]
                 )
                 self.vector_db.insert_chunk(
-                    document_id=key,
+                    document_id=current_document_id,
                     chunk_id=chunk["chunk_id"],
                     content=chunk["text"],
                     embedding=embedding,
