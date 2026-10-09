@@ -54,5 +54,5 @@
 
     - name: Install community.postgresql collection
       ansible.builtin.command:
-        cmd: ansible-galaxy collection install community.postgresql
+        cmd: ansible-galaxy collection install community.postgresql -p /usr/share/ansible/collections
       changed_when: false

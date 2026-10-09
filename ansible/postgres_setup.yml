@@ -16,7 +16,7 @@
 
     - name: Apply database schema from SQL file
       community.postgresql.postgresql_script:
-        db: "{{ db_name }}"
+        login_db: "{{ db_name }}"
         login_host: "{{ db_host }}"
         login_port: "{{ db_port }}"
         login_user: "{{ db_user }}"
