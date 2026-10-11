@@ -37,7 +37,7 @@ resource "aws_subnet" "private" {
     Name = "private-subnet-${var.availability_zones[count.index]}"
     Tier = "private"
   }
-} 
+}
 
 // Isolated subnet configuration for RDS
 resource "aws_subnet" "isolated" {
@@ -54,39 +54,17 @@ resource "aws_subnet" "isolated" {
 }
 
 /*
-                         AWS VPC
-                     10.0.0.0/16
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-            AZ-a                      AZ-b
-              │                         │
-       ┌──────┴──────┐           ┌──────┴──────┐
-       │             │           │             │
-    PUBLIC        PRIVATE      PUBLIC        PRIVATE
-  10.0.1.0/24   10.0.11.0/24 10.0.2.0/24  10.0.12.0/24
-       │             │           │             │
-      ALB          ECS/Lambda    ALB         ECS/Lambda
-       │             │           │             │
-       │           NAT GW        │           NAT GW
-       │             │           │             │
-       └─────────────┴───────────┴─────────────┘
-                           │
-                    Internet Gateway
-                           │
-                        Internet
+VPC: 10.0.0.0/16
 
+Public subnets (IGW route; ALB and EC2 use these):
+  ap-south-1a: 10.0.1.0/24
+  ap-south-1b: 10.0.2.0/24
 
-              ┌─────────────────────────────┐
-              │        ISOLATED TIER        │
-              │                             │
-              │ AZ-a           AZ-b         │
-              │ 10.0.21.0/24   10.0.22.0/24│
-              │     │              │        │
-              │    RDS         OpenSearch    │
-              │                             │
-              │ NO IGW                         │
-              │ NO NAT                         │
-              │ NO Internet route              │
-              └─────────────────────────────┘
+Private subnets (ECS tasks; outbound via per-AZ NAT Gateways):
+  ap-south-1a: 10.0.11.0/24
+  ap-south-1b: 10.0.12.0/24
+
+Isolated subnets (RDS subnet group; no internet route):
+  ap-south-1a: 10.0.21.0/24
+  ap-south-1b: 10.0.22.0/24
 */
