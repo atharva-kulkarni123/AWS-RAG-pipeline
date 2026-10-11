@@ -227,4 +227,6 @@ resource "aws_ecs_service" "rag_api" {
     aws_lb_listener.rag_api_http
   ]
 }
+
+
  
