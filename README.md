@@ -12,9 +12,8 @@ A ready-to-deploy, end-to-end **Retrieval-Augmented Generation (RAG)** template 
 
 ## Architecture
 
-![AWS RAG Pipeline architecture](docs/architecture.png)
+<img width="1297" height="917" alt="image" src="https://github.com/user-attachments/assets/79d11aef-21b5-4361-823b-b43aa120d605" />
 
-> Vector version: [`docs/architecture.svg`](docs/architecture.svg)
 
 ### How a request flows
 
