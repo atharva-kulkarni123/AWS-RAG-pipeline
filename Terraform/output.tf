@@ -23,6 +23,11 @@ output "nat_gateway_ids" {
   value       = aws_nat_gateway.main[*].id
 }
 
+output "rag_api_alb_dns_name" {
+  description = "Public DNS name of the RAG API Application Load Balancer"
+  value       = aws_lb.rag_api.dns_name
+}
+
 output "rds_endpoint" {
   description = "RDS PostgreSQL endpoint"
   value       = aws_db_instance.rag.address

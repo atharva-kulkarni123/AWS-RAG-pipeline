@@ -39,16 +39,6 @@ resource "aws_security_group" "ansible_sg" {
     cidr_blocks = [var.ssh_cidr]
   }
 
-  # PostgreSQL
-  ingress {
-    description = "PostgreSQL from private application subnets"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-
-    cidr_blocks = var.private_subnet_cidrs
-  }
-
   # Outbound traffic
   egress {
     from_port   = 0

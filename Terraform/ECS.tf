@@ -18,11 +18,11 @@ resource "aws_security_group" "ecs" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "RAG API"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "RAG API"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   egress {
@@ -210,14 +210,21 @@ resource "aws_ecs_service" "rag_api" {
   deployment_maximum_percent         = 100
 
   network_configuration {
-    subnets          = aws_subnet.public[*].id
+    subnets          = aws_subnet.private[*].id
     security_groups  = [aws_security_group.ecs.id]
-    assign_public_ip = true
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.rag_api.arn
+    container_name   = "rag-api"
+    container_port   = 8080
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.ecs_execution_managed,
-    aws_iam_role_policy.ecs_execution_secrets
+    aws_iam_role_policy.ecs_execution_secrets,
+    aws_lb_listener.rag_api_http
   ]
 }
  

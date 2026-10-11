@@ -5,7 +5,7 @@ resource "aws_route_table" "public" {
   tags = {
     Name = "public-route-table"
   }
-}   
+}
 
 // Adding internet route:
 resource "aws_route" "public_internet" {
@@ -22,8 +22,7 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-// -------------------------------
-// 2 Private Route table
+// Private subnets use one NAT Gateway per AZ for outbound access.
 resource "aws_route_table" "private" {
   count = 2
 
@@ -34,7 +33,6 @@ resource "aws_route_table" "private" {
   }
 }
 
-// Private subnets route outbound traffic through their local NAT Gateway:
 resource "aws_route" "private_nat" {
   count = 2
 
@@ -43,16 +41,14 @@ resource "aws_route" "private_nat" {
   nat_gateway_id         = aws_nat_gateway.main[count.index].id
 }
 
-// Associating the routes with the table
 resource "aws_route_table_association" "private" {
   count = 2
 
-  subnet_id = aws_subnet.private[count.index].id
-
+  subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
 
-// 2 Isolated route table 
+// Isolated route tables keep the database subnets off the internet.
 resource "aws_route_table" "isolated" {
   count = 2
 
@@ -73,9 +69,9 @@ resource "aws_route_table_association" "isolated" {
 }
 
 /*
-| Tier     | Subnets | Route tables | Why?                                     |
-| -------- | ------: | -----------: | ---------------------------------------- |
-| Public   |       2 |        **1** | Both use IGW                             |
-| Private  |       2 |        **2** | Each uses its AZ's NAT GW                |
-| Isolated |       2 |        **2** | AZ-specific isolation/future flexibility |
+| Tier     | Subnets | Explicit route tables | Why?                                      |
+| -------- | ------: | --------------------: | ----------------------------------------- |
+| Public   |       2 |                 **1** | ALB and NAT Gateways; IGW route           |
+| Private  |       2 |                 **2** | ECS; each AZ routes outbound through NAT |
+| Isolated |       2 |                 **2** | RDS; no internet route                   |
 */

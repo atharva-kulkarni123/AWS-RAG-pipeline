@@ -1,7 +1,5 @@
-// EIP for NAT gateway
 resource "aws_eip" "nat" {
-  count = 2
-
+  count  = 2
   domain = "vpc"
 
   tags = {
@@ -9,7 +7,6 @@ resource "aws_eip" "nat" {
   }
 }
 
-// NAT gateway 
 resource "aws_nat_gateway" "main" {
   count = 2
 
@@ -24,4 +21,3 @@ resource "aws_nat_gateway" "main" {
     aws_internet_gateway.main
   ]
 }
-
